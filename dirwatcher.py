@@ -10,11 +10,25 @@ logger = logging.getLogger(__file__)
 
 
 def watch_directory(args):
+    watching_files = {}
     logger.info(
         'Watching Directory: {}, File Ext: {}, '
         'Polling Interval: {}, Magic Text: {}'.format(
             args.path, args.ext, args.interval, args.magic
         ))
+
+    # Look at directory and get a list of files from it
+    # Add those to dictionary if not already present
+    # Log file as new
+
+    # Look at file dictionary and compare that to what is in the directory
+    # Remove files from dictionary if no longer present
+    # Log file as removed
+
+    # Open each file in the dictionary starting at the last line read
+    # Search for & update log if magic text found
+    # Keep track of last line read for each file
+
     while True:
         try:
             logger.info("Inside Watch Loop")
