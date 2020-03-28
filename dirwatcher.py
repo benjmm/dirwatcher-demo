@@ -37,6 +37,10 @@ def watch_directory(args):
             break
 
 
+def find_magic(filename, starting_line, magic_word):
+    pass
+
+
 def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--ext', type=str, default='.txt',
