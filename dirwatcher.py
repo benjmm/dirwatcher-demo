@@ -9,7 +9,8 @@ logger = logging.getLogger(__file__)
 
 def main():
     logging.basicConfig(
-        format='%(asctime)s.%(msecs)03d %(name)-12s %(levelname)-8s [%(threadName)-12s] %(message)s',
+        format='%(asctime)s.%(msecs)03d %(name)-12s %(levelname)-8s'
+        '[%(threadName)-12s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     logger.setLevel(logging.DEBUG)
