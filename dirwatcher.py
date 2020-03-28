@@ -3,8 +3,18 @@
 
 import logging
 import datetime
+import time
 
 logger = logging.getLogger(__file__)
+
+
+def watch_directory():
+    while True:
+        try:
+            logger.info("Inside Watch Loop")
+            time.sleep(1)
+        except KeyboardInterrupt:
+            break
 
 
 def main():
@@ -23,6 +33,7 @@ def main():
         '-------------------------------------------------------------------\n'
         .format(__file__, app_start_time.isoformat())
     )
+    watch_directory()
     uptime = datetime.datetime.now()-app_start_time
     logger.info(
         '\n'
