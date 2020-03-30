@@ -10,6 +10,7 @@ logger = logging.getLogger(__file__)
 
 
 def watch_directory(args):
+    # keys are filenames and values are last line read
     watching_files = {}
     logger.info(
         'Watching Directory: {}, File Ext: {}, '
