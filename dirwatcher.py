@@ -43,13 +43,13 @@ def watch_directory(args):
                 if dentry.endswith(args.ext):
                     if dentry not in watching_files:
                         watching_files[dentry] = 0
-                        print(f"{dentry} found")
-                        print(watching_files)
+                        logger.info(f"{dentry} found")
+                        # print(watching_files)
             for filename in list(watching_files.keys()):
                 if filename not in dentries:
-                    print(f"{filename} removed")
+                    logger.info(f"{filename} removed")
                     del(watching_files[filename])
-                    print(watching_files)
+                    # print(watching_files)
         # except KeyboardInterrupt:
         #     print("KeyboardInterrupt detected")
             # break
