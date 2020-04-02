@@ -5,18 +5,13 @@ import logging
 import datetime
 import time
 import argparse
+import os
 
 logger = logging.getLogger(__file__)
 
 
 def watch_directory(args):
     # keys are filenames and values are last line read
-    watching_files = {}
-    logger.info(
-        'Watching Directory: {}, File Ext: {}, '
-        'Polling Interval: {}, Magic Text: {}'.format(
-            args.path, args.ext, args.interval, args.magic
-        ))
 
     # Look at directory and get a list of files from it
     # Add those to dictionary if not already present
@@ -30,12 +25,30 @@ def watch_directory(args):
     # Search for & update log if magic text found
     # Keep track of last line read for each file
 
+    watching_files = {}
+    logger.info(
+        'Watching Directory: {}, File Ext: {}, '
+        'Polling Interval: {}, Magic Text: {}'.format(
+            args.path, args.ext, args.interval, args.magic
+        ))
+
     while True:
         try:
             logger.info("Inside Watch Loop")
             time.sleep(args.interval)
-        except KeyboardInterrupt:
-            break
+
+            for dentry in os.scandir(args.path):
+                if dentry.name.endswith(args.ext):
+                    if dentry.name not in watching_files:
+                        watching_files[dentry.name] = 0
+                        print("{} found".format(dentry.name))
+                        # print(watching_files)
+
+        # except KeyboardInterrupt:
+        #     print("KeyboardInterrupt detected")
+            # break
+        except FileNotFoundError as e:
+            print(e)
 
 
 def find_magic(filename, starting_line, magic_word):
