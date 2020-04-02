@@ -37,13 +37,19 @@ def watch_directory(args):
             logger.info("Inside Watch Loop")
             time.sleep(args.interval)
 
-            for dentry in os.scandir(args.path):
-                if dentry.name.endswith(args.ext):
-                    if dentry.name not in watching_files:
-                        watching_files[dentry.name] = 0
-                        print("{} found".format(dentry.name))
-                        # print(watching_files)
+            dentries = [dentry.name for dentry in os.scandir(args.path)]
 
+            for dentry in dentries:
+                if dentry.endswith(args.ext):
+                    if dentry not in watching_files:
+                        watching_files[dentry] = 0
+                        print(f"{dentry} found")
+                        print(watching_files)
+            for filename in list(watching_files.keys()):
+                if filename not in dentries:
+                    print(f"{filename} removed")
+                    del(watching_files[filename])
+                    print(watching_files)
         # except KeyboardInterrupt:
         #     print("KeyboardInterrupt detected")
             # break
