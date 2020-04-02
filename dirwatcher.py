@@ -38,7 +38,6 @@ def watch_directory(args):
             logger.info("Inside Watch Loop")
             time.sleep(args.interval)
 
-            # dentries = [dentry.name for dentry in os.scandir(args.path)]
             files_list = []
 
             for root, dirs, files in os.walk(args.path):
@@ -51,6 +50,7 @@ def watch_directory(args):
                     watching_files[filename] = 0
                     logger.info(f"{filename} found")
                     # print(watching_files)
+
             for filename in list(watching_files.keys()):
                 if filename not in files_list:
                     logger.info(f"{filename} removed")
