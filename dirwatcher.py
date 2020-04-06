@@ -55,6 +55,8 @@ def watch_directory(args):
                 if filepath not in files_list:
                     logger.info(f"{filepath} removed")
                     del(watching_filepaths[filepath])
+                else:
+                    logger.info(f"Reading {filepath}")
                     # print(watching_filepaths)
 
         # except KeyboardInterrupt:
