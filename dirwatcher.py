@@ -25,7 +25,7 @@ def watch_directory(args):
     # Search for & update log if magic text found
     # Keep track of last line read for each file
 
-    watching_files = {}
+    watching_filepaths = {}
 
     logger.info(
         'Watching Directory: {}, File Ext: {}, '
@@ -43,19 +43,19 @@ def watch_directory(args):
             for root, dirs, files in os.walk(args.path):
                 for filename in files:
                     if filename.endswith(args.ext):
-                        files_list.append(filename)
+                        files_list.append(os.path.join(root, filename))
 
-            for filename in files_list:
-                if filename not in watching_files:
-                    watching_files[filename] = 0
-                    logger.info(f"{filename} found")
-                    # print(watching_files)
+            for filepath in files_list:
+                if filepath not in watching_filepaths:
+                    logger.info(f"{filepath} found")
+                    watching_filepaths[filepath] = 0
+                    # print(watching_filepaths)
 
-            for filename in list(watching_files.keys()):
-                if filename not in files_list:
-                    logger.info(f"{filename} removed")
-                    del(watching_files[filename])
-                    # print(watching_files)
+            for filepath in list(watching_filepaths.keys()):
+                if filepath not in files_list:
+                    logger.info(f"{filepath} removed")
+                    del(watching_filepaths[filepath])
+                    # print(watching_filepaths)
 
         # except KeyboardInterrupt:
         #     print("KeyboardInterrupt detected")
