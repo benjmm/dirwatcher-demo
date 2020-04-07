@@ -7,8 +7,29 @@ import time
 import argparse
 import os
 import linecache
+import signal
+
+exit_flag = False
 
 logger = logging.getLogger(__file__)
+
+
+def signal_handler(sig_num, frame):
+    """
+    This is a handler for SIGTERM and SIGINT. Other signals can be mapped here as well (SIGHUP?)
+    Basically it just sets a global flag, and main() will exit it's loop if the signal is trapped.
+    :param sig_num: The integer signal number that was trapped from the OS.
+    :param frame: Not used
+    :return None
+    """
+    global exit_flag
+    # log the associated signal name (the python3 way)
+    logger.warn('Received ' + signal.Signals(sig_num).name)
+    # log the signal name (the python2 way)
+    signames = dict((k, v) for v, k in reversed(sorted(signal.__dict__.items()))
+                    if v.startswith('SIG') and not v.startswith('SIG_'))
+    logger.warn('Received ' + signames[sig_num])
+    exit_flag = True
 
 
 def watch_directory(args):
@@ -27,7 +48,8 @@ def watch_directory(args):
         try:
             loop_iter += 1
             print(
-                f"Scanning directory {args.path}, iteration number {loop_iter}")
+                f"Scanning directory {args.path}, "
+                f"iteration number {loop_iter}")
             time.sleep(args.interval)
 
             files_list = []
@@ -102,9 +124,21 @@ def main():
         '-------------------------------------------------------------------\n'
         .format(__file__, app_start_time.isoformat())
     )
+
+    # Hook these two signals from the OS ..
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    # Now my signal_handler will get called if OS sends either of these to my process.
+
     parser = create_parser()
     args = parser.parse_args()
-    watch_directory(args)
+
+    while not exit_flag:
+        try:
+            watch_directory(args)
+        except Exception as e:
+            logger.info(e)
+
     uptime = datetime.datetime.now()-app_start_time
     logger.info(
         '\n'
