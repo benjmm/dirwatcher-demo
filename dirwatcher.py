@@ -31,6 +31,8 @@ def watch_directory(args):
 
             files_list = []
 
+            os.listdir(args.path)
+
             for root, dirs, files in os.walk(args.path):
                 for filename in files:
                     if filename.endswith(args.ext):
@@ -66,7 +68,7 @@ def watch_directory(args):
             print("KeyboardInterrupt detected")
             break
         except FileNotFoundError as e:
-            print("Path not found")
+            # print("Path not found")
             print(e)
 
 
