@@ -10,37 +10,23 @@ import linecache
 
 logger = logging.getLogger(__file__)
 
-# logger.basicConfig(filename='magic.log', filemode='a')
-
 
 def watch_directory(args):
-    # keys are filenames and values are last line read
-
-    # Look at directory and get a list of files from it
-    # Add those to dictionary if not already present
-    # Log file as new
-
-    # Look at file dictionary and compare that to what is in the directory
-    # Remove files from dictionary if no longer present
-    # Log file as removed
-
-    # Open each file in the dictionary starting at the last line read
-    # Search for & update log if magic text found
-    # Keep track of last line read for each file
 
     watching_filepaths = {}
     loop_iter = 0
 
     logger.info(
-        'Watching Directory: {}, File Ext: {}, '
-        'Polling Interval: {}, Magic Text: {}'.format(
-            args.path, args.ext, args.interval, args.magic
-        ))
+        f"Watching Directory: {args.path}, "
+        f"File Ext: {args.ext}, "
+        f"Polling Interval: {args.interval}, "
+        f"Magic Text: {args.magic}"
+    )
 
     while True:
         try:
             loop_iter += 1
-            print(f"Main Loop Iteration: {loop_iter}")
+            print(f"{args.path} Scan Iteration: {loop_iter}")
             time.sleep(args.interval)
 
             files_list = []
@@ -61,25 +47,20 @@ def watch_directory(args):
                     del(watching_filepaths[filepath])
                 else:
                     current_line = watching_filepaths[filepath]
-                    # print(
-                    #     f"Checking {filepath} starting at line {current_line}")
                     while True:
                         linecache.checkcache(filepath)
                         line = linecache.getline(filepath, current_line)
-                        # print(f"Reading line {current_line}:")
-                        # print(line)
                         if (line == ""):
-                            # print("Line empty")
                             break
                         elif args.magic in line:
                             logger.info(
-                                f"Magic found in {filepath} on line {current_line}")
+                                f"Magic found in {filepath} "
+                                f"on line {current_line}"
+                            )
                             current_line += 1
                         else:
-                            # print("Line has no magic")
                             current_line += 1
                         watching_filepaths[filepath] = current_line
-                    # print(watching_filepaths)
 
         except KeyboardInterrupt:
             print("KeyboardInterrupt detected")
@@ -102,8 +83,8 @@ def create_parser():
 
 def main():
     logging.basicConfig(filename='magic.log', filemode='a',
-                        format='%(asctime)s.%(msecs)03d %(name)-12s %(levelname)-8s'
-                        '[%(threadName)-12s] %(message)s',
+                        format='%(asctime)s.%(msecs)03d %(name)-12s '
+                        '%(levelname)-8s [%(threadName)-12s] %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S'
                         )
     logger.setLevel(logging.DEBUG)
