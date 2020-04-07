@@ -84,10 +84,13 @@ def create_parser():
 
 
 def main():
-    logging.basicConfig(filename='magic.log', filemode='a',
-                        format='%(asctime)s.%(msecs)03d %(name)-12s '
+    logging.basicConfig(format='%(asctime)s.%(msecs)03d %(name)-12s '
                         '%(levelname)-8s [%(threadName)-12s] %(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%S'
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        handlers=[
+                            logging.FileHandler("magic.log", mode='a'),
+                            logging.StreamHandler()
+                        ]
                         )
     logger.setLevel(logging.DEBUG)
     app_start_time = datetime.datetime.now()
