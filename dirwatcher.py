@@ -10,6 +10,8 @@ import linecache
 
 logger = logging.getLogger(__file__)
 
+# logger.basicConfig(filename='magic.log', filemode='a')
+
 
 def watch_directory(args):
     # keys are filenames and values are last line read
@@ -59,30 +61,31 @@ def watch_directory(args):
                     del(watching_filepaths[filepath])
                 else:
                     current_line = watching_filepaths[filepath]
-                    print(
-                        f"Checking {filepath} starting at line {current_line}")
+                    # print(
+                    #     f"Checking {filepath} starting at line {current_line}")
                     while True:
                         linecache.checkcache(filepath)
                         line = linecache.getline(filepath, current_line)
-                        print(f"Reading line {current_line}:")
-                        print(line)
+                        # print(f"Reading line {current_line}:")
+                        # print(line)
                         if (line == ""):
-                            print("Line empty")
+                            # print("Line empty")
                             break
                         elif args.magic in line:
                             logger.info(
                                 f"Magic found in {filepath} on line {current_line}")
                             current_line += 1
                         else:
-                            print("Line has no magic")
+                            # print("Line has no magic")
                             current_line += 1
                         watching_filepaths[filepath] = current_line
-                    print(watching_filepaths)
+                    # print(watching_filepaths)
 
-        # except KeyboardInterrupt:
-        #     print("KeyboardInterrupt detected")
-            # break
+        except KeyboardInterrupt:
+            print("KeyboardInterrupt detected")
+            break
         except FileNotFoundError as e:
+            print("Path not found")
             print(e)
 
 
@@ -98,11 +101,11 @@ def create_parser():
 
 
 def main():
-    logging.basicConfig(
-        format='%(asctime)s.%(msecs)03d %(name)-12s %(levelname)-8s'
-        '[%(threadName)-12s] %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
+    logging.basicConfig(filename='magic.log', filemode='a',
+                        format='%(asctime)s.%(msecs)03d %(name)-12s %(levelname)-8s'
+                        '[%(threadName)-12s] %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S'
+                        )
     logger.setLevel(logging.DEBUG)
     app_start_time = datetime.datetime.now()
     logger.info(
