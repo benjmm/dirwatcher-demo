@@ -6,6 +6,7 @@ import datetime
 import time
 import argparse
 import os
+import linecache
 
 logger = logging.getLogger(__file__)
 
@@ -26,6 +27,7 @@ def watch_directory(args):
     # Keep track of last line read for each file
 
     watching_filepaths = {}
+    loop_iter = 0
 
     logger.info(
         'Watching Directory: {}, File Ext: {}, '
@@ -35,7 +37,8 @@ def watch_directory(args):
 
     while True:
         try:
-            logger.info("Inside Watch Loop")
+            loop_iter += 1
+            print(f"Main Loop Iteration: {loop_iter}")
             time.sleep(args.interval)
 
             files_list = []
@@ -48,26 +51,39 @@ def watch_directory(args):
             for filepath in files_list:
                 if filepath not in watching_filepaths:
                     logger.info(f"{filepath} found")
-                    watching_filepaths[filepath] = 0
-                    # print(watching_filepaths)
+                    watching_filepaths[filepath] = 1
 
             for filepath in list(watching_filepaths.keys()):
                 if filepath not in files_list:
                     logger.info(f"{filepath} removed")
                     del(watching_filepaths[filepath])
                 else:
-                    logger.info(f"Reading {filepath}")
-                    # print(watching_filepaths)
+                    current_line = watching_filepaths[filepath]
+                    print(
+                        f"Checking {filepath} starting at line {current_line}")
+                    while True:
+                        linecache.checkcache(filepath)
+                        line = linecache.getline(filepath, current_line)
+                        print(f"Reading line {current_line}:")
+                        print(line)
+                        if (line == ""):
+                            print("Line empty")
+                            break
+                        elif args.magic in line:
+                            logger.info(
+                                f"Magic found in {filepath} on line {current_line}")
+                            current_line += 1
+                        else:
+                            print("Line has no magic")
+                            current_line += 1
+                        watching_filepaths[filepath] = current_line
+                    print(watching_filepaths)
 
         # except KeyboardInterrupt:
         #     print("KeyboardInterrupt detected")
             # break
         except FileNotFoundError as e:
             print(e)
-
-
-def find_magic(filename, starting_line, magic_word):
-    pass
 
 
 def create_parser():
