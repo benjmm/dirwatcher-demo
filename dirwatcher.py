@@ -88,7 +88,7 @@ def main():
                         '%(levelname)-8s [%(threadName)-12s] %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         handlers=[
-                            logging.FileHandler("magic.log", mode='a'),
+                            logging.FileHandler("dirwatcher.log", mode='a'),
                             logging.StreamHandler()
                         ]
                         )
