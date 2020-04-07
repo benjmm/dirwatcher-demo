@@ -26,7 +26,8 @@ def watch_directory(args):
     while True:
         try:
             loop_iter += 1
-            print(f"{args.path} Scan Iteration: {loop_iter}")
+            print(
+                f"Scanning directory {args.path}, iteration number {loop_iter}")
             time.sleep(args.interval)
 
             files_list = []
@@ -65,11 +66,10 @@ def watch_directory(args):
                         watching_filepaths[filepath] = current_line
 
         except KeyboardInterrupt:
-            print("KeyboardInterrupt detected")
+            logger.info("KeyboardInterrupt detected")
             break
         except FileNotFoundError as e:
-            # print("Path not found")
-            print(e)
+            logger.info(e)
 
 
 def create_parser():
