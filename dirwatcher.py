@@ -44,7 +44,7 @@ def signal_handler(sig_num, frame):
     :return None
     """
     global exit_flag
-    logger.warn('Received ' + signal.Signals(sig_num).name)
+    logger.warning('Received ' + signal.Signals(sig_num).name)
     exit_flag = True
 
 
@@ -148,7 +148,7 @@ def main():
                         '%(levelname)-8s [%(threadName)-12s] %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         handlers=[
-                            logging.FileHandler("dirwatcher.log", mode='a'),
+                            # logging.FileHandler("dirwatcher.log", mode='a'),
                             logging.StreamHandler()
                         ]
                         )
