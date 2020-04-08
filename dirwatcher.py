@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import logging
 import datetime
 import time
@@ -8,6 +9,10 @@ import argparse
 import os
 import linecache
 import signal
+
+
+# if sys.version_info[0] < 3:
+#     raise Exception("This program requires python3 interpreter")
 
 exit_flag = False
 
@@ -23,49 +28,53 @@ def signal_handler(sig_num, frame):
     :return None
     """
     global exit_flag
-    # log the associated signal name (the python3 way)
     logger.warn('Received ' + signal.Signals(sig_num).name)
-    # log the signal name (the python2 way)
-    signames = dict((k, v) for v, k in reversed(sorted(signal.__dict__.items()))
-                    if v.startswith('SIG') and not v.startswith('SIG_'))
-    logger.warn('Received ' + signames[sig_num])
     exit_flag = True
 
 
 def watch_directory(args):
 
+    # Dictionary of tracked files and current line for each:
     watching_filepaths = {}
-    loop_iter = 0
 
-    logger.info(
-        f"Watching Directory: {args.path}, "
-        f"File Ext: {args.ext}, "
-        f"Polling Interval: {args.interval}, "
-        f"Magic Text: {args.magic}"
-    )
+    # Current iteration of the main execution loop:
+    loop_iter = 0
 
     while True:
         try:
             loop_iter += 1
-            print(
-                f"Scanning directory {args.path}, "
-                f"iteration number {loop_iter}")
-            time.sleep(args.interval)
 
+            # Create/reset variable for list of files matching requested extension:
             files_list = []
 
+            # Implement polling interval:
+            time.sleep(args.interval)
+
+            # Ongoing visual indication of activity in terminal:
+            print(
+                f"Directory: {args.path}, "
+                f"Extension: {args.ext}, "
+                f"Magic Word: {args.magic}, "
+                f"Iteration: {loop_iter}, "
+                f"PID: {os.getpid()}")
+
+            # Raise FileNotFound on every iteration if path does not exist:
             os.listdir(args.path)
 
+            # Build files_list of files found with specified extension:
             for root, dirs, files in os.walk(args.path):
                 for filename in files:
                     if filename.endswith(args.ext):
                         files_list.append(os.path.join(root, filename))
 
+            # Add new items to watching_filepaths based on files_list:
             for filepath in files_list:
                 if filepath not in watching_filepaths:
                     logger.info(f"{filepath} found")
                     watching_filepaths[filepath] = 1
 
+            # Remove item from watching_filepaths if not in current files_list
+            # else scan item for magic text and update current_line:
             for filepath in list(watching_filepaths.keys()):
                 if filepath not in files_list:
                     logger.info(f"{filepath} removed")
@@ -86,10 +95,6 @@ def watch_directory(args):
                         else:
                             current_line += 1
                         watching_filepaths[filepath] = current_line
-
-        except KeyboardInterrupt:
-            logger.info("KeyboardInterrupt detected")
-            break
         except FileNotFoundError as e:
             logger.info(e)
 
@@ -106,6 +111,15 @@ def create_parser():
 
 
 def main():
+
+    app_start_time = datetime.datetime.now()
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    parser = create_parser()
+    args = parser.parse_args()
+
     logging.basicConfig(format='%(asctime)s.%(msecs)03d %(name)-12s '
                         '%(levelname)-8s [%(threadName)-12s] %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
@@ -114,40 +128,41 @@ def main():
                             logging.StreamHandler()
                         ]
                         )
+
     logger.setLevel(logging.DEBUG)
-    app_start_time = datetime.datetime.now()
+
     logger.info(
         '\n'
         '-------------------------------------------------------------------\n'
         '    Running {0}\n'
-        '    Started on {1}\n'
+        '    PID: {1}\n'
+        '    Started on: {2}\n'
+        '    Watching Directory: {3}\n'
+        '    File Ext: {4}\n'
+        '    Polling Interval: {5}\n'
+        '    Magic Text: {6}\n'
         '-------------------------------------------------------------------\n'
-        .format(__file__, app_start_time.isoformat())
+        .format(__file__, os.getpid(), app_start_time.isoformat(),
+                args.path, args.ext, args.interval, args.magic)
     )
-
-    # Hook these two signals from the OS ..
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-    # Now my signal_handler will get called if OS sends either of these to my process.
-
-    parser = create_parser()
-    args = parser.parse_args()
 
     while not exit_flag:
         try:
             watch_directory(args)
         except Exception as e:
             logger.info(e)
+        # finally:
+        #     uptime = datetime.datetime.now()-app_start_time
+        #     logger.info(
+        #         '\n'
+        #         '-------------------------------------------------------------------\n'
+        #         '    Stopped {0}\n'
+        #         '    Uptime: {1}\n'
+        #         '-------------------------------------------------------------------\n'
+        #         .format(__file__, str(uptime))
+        #     )
 
-    uptime = datetime.datetime.now()-app_start_time
-    logger.info(
-        '\n'
-        '-------------------------------------------------------------------\n'
-        '    Stopped {0}\n'
-        '    Uptime was {1}\n'
-        '-------------------------------------------------------------------\n'
-        .format(__file__, str(uptime))
-    )
+    print("I have shut down gracefully.")
 
 
 if __name__ == '__main__':
