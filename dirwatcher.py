@@ -1,6 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+Command-line utility for monitoring text files.
+
+This utility will recursively monitor a given directory for the presence
+of files ending in a specified extension for the presence of a given
+text string. It is assumed that monitored files will only ever be
+added, removed, or appended to (not edited),
+as in the case of typical log files.
+"""
+
+__author__ = "benjmm with signal help from Bryan Fernandez"
+
 import sys
 import logging
 import datetime
@@ -10,21 +22,23 @@ import os
 import linecache
 import signal
 
-# help from Bryan Fernandez to get OS signals working correctly
+# Python3 interpreter check:
+if sys.version_info[0] < 3:
+    raise Exception("This program requires python3 interpreter")
 
-
-# if sys.version_info[0] < 3:
-#     raise Exception("This program requires python3 interpreter")
-
+# Global exit flag:
 exit_flag = False
 
+# Logger instantiation:
 logger = logging.getLogger(__file__)
 
 
 def signal_handler(sig_num, frame):
     """
-    This is a handler for SIGTERM and SIGINT. Other signals can be mapped here as well (SIGHUP?)
-    Basically it just sets a global flag, and main() will exit it's loop if the signal is trapped.
+    This is a handler for SIGTERM and SIGINT.
+    Other signals can be mapped here as well.
+    Sets a global flag that notifies main() to exit its loop
+    if the signal is trapped.
     :param sig_num: The integer signal number that was trapped from the OS.
     :param frame: Not used
     :return None
@@ -35,30 +49,34 @@ def signal_handler(sig_num, frame):
 
 
 def watch_directory(args):
+    """
+    Primary program method, consisting of a loop that repeatedly scans
+    the requested directory for magic text and logs changes.
+    :param args: arguments received from command line
+    :return None
+    """
+    # Current iteration of the main execution loop:
+    loop_iter = 0
 
     # Dictionary of tracked files and current line for each:
     watching_filepaths = {}
-
-    # Current iteration of the main execution loop:
-    loop_iter = 0
 
     while not exit_flag:
         try:
             loop_iter += 1
 
-            # Create/reset variable for list of files matching requested extension:
+            # Create/reset list of files matching requested extension:
             files_list = []
 
             # Implement polling interval:
             time.sleep(args.interval)
 
-            # Ongoing visual indication of activity in terminal:
-            print(
-                f"Directory: {args.path}, "
-                f"Extension: {args.ext}, "
-                f"Magic Word: {args.magic}, "
-                f"Iteration: {loop_iter}, "
-                f"PID: {os.getpid()}")
+            # When in debug mode, ongoing indication of activity in terminal:
+            logger.debug(f"Directory: {args.path}, "
+                         f"Extension: {args.ext}, "
+                         f"Magic Word: {args.magic}, "
+                         f"Iteration: {loop_iter}, "
+                         f"PID: {os.getpid()}")
 
             # Raise FileNotFound on every iteration if path does not exist:
             os.listdir(args.path)
@@ -113,7 +131,11 @@ def create_parser():
 
 
 def main():
-
+    """
+    Initializes signal handling, parser, and logging,
+    then scans until interrupted.
+    :return None
+    """
     app_start_time = datetime.datetime.now()
 
     signal.signal(signal.SIGINT, signal_handler)
@@ -131,11 +153,11 @@ def main():
                         ]
                         )
 
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     logger.info(
         '\n'
-        '-------------------------------------------------------------------\n'
+        '-----------------------------------------------------------\n'
         '    Running {0}\n'
         '    PID: {1}\n'
         '    Started on: {2}\n'
@@ -143,7 +165,7 @@ def main():
         '    File Ext: {4}\n'
         '    Polling Interval: {5}\n'
         '    Magic Text: {6}\n'
-        '-------------------------------------------------------------------\n'
+        '-----------------------------------------------------------\n'
         .format(__file__, os.getpid(), app_start_time.isoformat(),
                 args.path, args.ext, args.interval, args.magic)
     )
@@ -151,25 +173,18 @@ def main():
     while not exit_flag:
         try:
             watch_directory(args)
-            # while not exit_flag:
-            #     print("Tick...")
-            #     time.sleep(1)
-            #     print("Tock...")
-
         except Exception as e:
             logger.info(e)
         finally:
             uptime = datetime.datetime.now()-app_start_time
             logger.info(
                 '\n'
-                '-------------------------------------------------------------------\n'
+                '-----------------------------------------------------------\n'
                 '    Stopped {0}\n'
                 '    Uptime: {1}\n'
-                '-------------------------------------------------------------------\n'
+                '-----------------------------------------------------------\n'
                 .format(__file__, str(uptime))
             )
-
-    # print("I have shut down gracefully.")
 
 
 if __name__ == '__main__':
