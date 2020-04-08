@@ -10,6 +10,8 @@ import os
 import linecache
 import signal
 
+# help from Bryan Fernandez to get OS signals working correctly
+
 
 # if sys.version_info[0] < 3:
 #     raise Exception("This program requires python3 interpreter")
@@ -40,7 +42,7 @@ def watch_directory(args):
     # Current iteration of the main execution loop:
     loop_iter = 0
 
-    while True:
+    while not exit_flag:
         try:
             loop_iter += 1
 
@@ -149,20 +151,25 @@ def main():
     while not exit_flag:
         try:
             watch_directory(args)
+            # while not exit_flag:
+            #     print("Tick...")
+            #     time.sleep(1)
+            #     print("Tock...")
+
         except Exception as e:
             logger.info(e)
-        # finally:
-        #     uptime = datetime.datetime.now()-app_start_time
-        #     logger.info(
-        #         '\n'
-        #         '-------------------------------------------------------------------\n'
-        #         '    Stopped {0}\n'
-        #         '    Uptime: {1}\n'
-        #         '-------------------------------------------------------------------\n'
-        #         .format(__file__, str(uptime))
-        #     )
+        finally:
+            uptime = datetime.datetime.now()-app_start_time
+            logger.info(
+                '\n'
+                '-------------------------------------------------------------------\n'
+                '    Stopped {0}\n'
+                '    Uptime: {1}\n'
+                '-------------------------------------------------------------------\n'
+                .format(__file__, str(uptime))
+            )
 
-    print("I have shut down gracefully.")
+    # print("I have shut down gracefully.")
 
 
 if __name__ == '__main__':
