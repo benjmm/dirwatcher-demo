@@ -1,4 +1,4 @@
-# dirwatcher-demo
+# dirwatcher
 
 Directory monitoring application written in Python
 
