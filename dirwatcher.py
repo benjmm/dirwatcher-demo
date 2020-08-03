@@ -11,7 +11,7 @@ added, removed, or appended to (not edited),
 as in the case of typical log files.
 """
 
-__author__ = "benjmm with signal help from Bryan Fernandez"
+__author__ = "techieben with signal help from Bryan Fernandez"
 
 import sys
 import logging
